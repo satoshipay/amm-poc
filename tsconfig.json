@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "CommonJS",
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "target": "ES2017"
+  },
+  "include": [
+    "src/market-maker.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
