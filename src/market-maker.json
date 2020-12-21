@@ -1,0 +1,20 @@
+[
+  {
+    "name": "action",
+    "type": "string",
+    "description": "Action that the AMM should execute",
+    "rule": "Must be `trade`"
+  },
+  {
+    "name": "in",
+    "type": "object",
+    "description": "Object with amount and asset",
+    "rule": "Must contain amount and asset"
+  },
+  {
+    "name": "out",
+    "type": "object",
+    "description": "Object with amount and asset",
+    "rule": "Must contain amount and asset"
+  }
+]
