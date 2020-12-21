@@ -1,38 +1,39 @@
-const path = require('path')
-const TerserPlugin = require('terser-webpack-plugin')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const path = require("path")
+const TerserPlugin = require("terser-webpack-plugin")
+const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 
 module.exports = {
-  target: 'node',
+  target: "node",
   output: {
-    path: path.resolve(__dirname, 'contracts/dist'),
-    libraryExport: 'default',
-    libraryTarget: 'commonjs-module',
-    filename: '[name].js'
+    path: path.resolve(__dirname, "contracts/dist"),
+    libraryExport: "default",
+    libraryTarget: "commonjs-module",
+    filename: "[name].js",
+  },
+  resolve: {
+    // Add `.ts` and `.tsx` as a resolvable extension.
+    extensions: [".ts", ".tsx", ".js"],
   },
   module: {
     rules: [
+      { test: /\.tsx?$/, loader: "ts-loader" },
       {
         test: /\.js$/,
         exclude: /node_modules/,
         use: [
           {
-            loader: 'babel-loader',
+            loader: "babel-loader",
             options: {
-              presets: ['@babel/preset-env']
-            }
-          }
-        ]
-      }
-    ]
+              presets: ["@babel/preset-env"],
+            },
+          },
+        ],
+      },
+    ],
   },
   optimization: {
     minimize: true,
-    minimizer: [
-      new TerserPlugin()
-    ]
+    minimizer: [new TerserPlugin()],
   },
-  plugins: [
-    new CleanWebpackPlugin(),
-  ]
+  plugins: [new CleanWebpackPlugin()],
 }
