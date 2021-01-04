@@ -68,7 +68,7 @@ function LiquidityArea(props: Props) {
         <ProvideLiquidityView balances={balances} testnet={testnet} />
       </TabPanel>
       <TabPanel value={selectedTab} index={1}>
-        <WithdrawLiquidityView balances={balances} testnet={testnet} />
+        <WithdrawLiquidityView />
       </TabPanel>
       <TabPanel value={selectedTab} index={2}></TabPanel>
     </Paper>

@@ -4,6 +4,7 @@ import AssetTextField from "../../AssetTextField"
 import AssetSelector from "../../AssetSelector"
 import Box from "@material-ui/core/Box"
 import Typography from "@material-ui/core/Typography"
+import Button from "@material-ui/core/Button"
 
 interface Props {
   balances: Horizon.BalanceLine[]
@@ -58,6 +59,9 @@ function ProvideLiquidityView(props: Props) {
         value={amount2}
         onChange={(e) => setAmount2(e.target.value)}
       />
+      <Button color="primary" variant="outlined" style={{ marginTop: 16 }}>
+        Provide
+      </Button>
     </Box>
   )
 }

@@ -1,36 +1,19 @@
-import React from "react"
-import { Asset, Horizon } from "stellar-sdk"
-import AssetInputField from "../../AssetTextField"
-import AssetSelector from "../../AssetSelector"
 import Box from "@material-ui/core/Box"
+import Button from "@material-ui/core/Button"
+import TextField from "@material-ui/core/TextField"
+import React from "react"
 
-interface Props {
-  balances: Horizon.BalanceLine[]
-  testnet: boolean
-}
+interface Props {}
 
 function WithdrawLiquidityView(props: Props) {
-  const { balances, testnet } = props
   const [amount, setAmount] = React.useState("")
-  const [asset, setAsset] = React.useState<Asset | undefined>()
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
-      <AssetInputField
-        assetCode={
-          <AssetSelector
-            assets={balances}
-            disableUnderline
-            testnet={testnet}
-            onChange={(a) => setAsset(a)}
-            value={asset}
-          />
-        }
-        fullWidth
-        label="Pool Tokens"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-      />
+      <TextField fullWidth label="Pool Tokens" value={amount} onChange={(e) => setAmount(e.target.value)} />
+      <Button color="primary" variant="outlined" style={{ marginTop: 16 }}>
+        Withdraw
+      </Button>
     </Box>
   )
 }
