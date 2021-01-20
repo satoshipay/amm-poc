@@ -71,6 +71,7 @@ async function run() {
       formData.append("payment", uploadFeePaymentXDR)
 
       const postURL = turretURL.replace(/\/$/, "") + "/contract"
+
       console.log("posting to turret", postURL)
       const postResponse = await axios.post(postURL, formData, {
         headers: formData.getHeaders(),
