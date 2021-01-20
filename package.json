@@ -6,9 +6,11 @@
   "author": "SatoshiPay Ltd",
   "scripts": {
     "build": "webpack -c ./webpack.config.js --entry ./src/market-maker.ts --mode production",
-    "deploy": "node upload-contract.js src/market-maker.ts src/market-maker.json $TURRET_LIST $TESTNET $PAYMENT_KEY",
-    "deploy-dev": "TURRET_LIST=http://localhost:4000/dev TESTNET=true PAYMENT_KEY=SA4LWKSJ6L6GPPBHXWYU4X2SGSBTXPTFX77HN356AW4P3BFFNZYZJREE npm run deploy",
-    "deploy-prod": "TURRET_LIST=http://localhost:4000/dev TESTNET=false npm run deploy"
+    "upload": "node upload-contract.js contracts/dist/main.js src/market-maker.json $TURRET_LIST $TESTNET $PAYMENT_KEY",
+    "upload-dev": "TURRET_LIST=http://localhost:4000/dev TESTNET=true PAYMENT_KEY=SA4LWKSJ6L6GPPBHXWYU4X2SGSBTXPTFX77HN356AW4P3BFFNZYZJREE npm run upload",
+    "upload-prod": "TURRET_LIST=http://localhost:4000/dev TESTNET=false npm run upload",
+    "deploy-dev": "npm run build && npm run upload-dev",
+    "deploy-prod": "npm run build && npm run upload-prod"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.64",
@@ -21,7 +23,7 @@
     "webpack-cli": "^4.2.0"
   },
   "dependencies": {
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "form-data": "^3.0.0",
     "http-errors": "^1.8.0",
     "stellar-sdk": "^7.0.0"
