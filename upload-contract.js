@@ -48,7 +48,7 @@ async function run() {
       const baseFee = await server.fetchBaseFee()
 
       const transaction = new TransactionBuilder(account, {
-        fee: baseFee * 3,
+        fee: baseFee * 100,
         networkPassphrase: testnet ? Networks.TESTNET : Networks.PUBLIC,
       })
         .addOperation(
