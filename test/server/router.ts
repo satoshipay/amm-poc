@@ -4,9 +4,6 @@ import { Keypair } from "stellar-sdk"
 import { AMMRequestBody } from "../../src/types"
 import { Config } from "./config"
 
-const turretAccount = Keypair.fromSecret("SADEOKHGP5I4KBPP5AOMJWPY32AEP7A6POGKQN74NLO3MGTQT7J36FOA")
-const signerAccount = Keypair.fromSecret("SAEOFJZDDHJX5SPSN23JYF3XK2UWP6LDO4LVT5XDG274WHWF7FZBYDO6")
-
 let contract: any = null
 try {
   contract = require("../contract/main.js")
@@ -17,6 +14,9 @@ const contractFields = require("../contract/fields.json")
 
 export default function createRouter(config: Config) {
   const router = new Router()
+
+  const turretAccount = Keypair.fromSecret(config.turretAccountSecret)
+  const signerAccount = Keypair.fromSecret(config.signingAccountSecret)
 
   router.use(
     BodyParser({
