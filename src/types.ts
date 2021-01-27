@@ -10,7 +10,7 @@ export interface TSSContract<RequestBody> {
   (input: TSSContractInput<RequestBody>): Promise<string>
 }
 
-interface TSSContractInput<RequestBody> {
+export interface TSSContractInput<RequestBody> {
   request: RequestBody
   signers: string[]
 }

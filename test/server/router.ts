@@ -1,11 +1,12 @@
 import BodyParser from "koa-body"
 import Router from "koa-router"
 import * as path from "path"
-import { Keypair } from "stellar-sdk"
-import { AMMRequestBody } from "../../src/types"
+import { Keypair, Networks, Transaction } from "stellar-sdk"
+import { AMMRequestBody, TSSContract, TSSContractInput } from "../../src/types"
 import { Config } from "./config"
 
-let contract: any = null
+let contract: TSSContract<AMMRequestBody.Any>
+
 try {
   contract = require(path.join(__dirname, "../contract/main.js"))
 } catch (error) {
@@ -57,12 +58,14 @@ export default function createRouter(config: Config) {
   })
 
   router.post("/contract/:hash", async ({ params, request, response }) => {
-    const requestBody = JSON.parse(request.body) as AMMRequestBody.Any
-
-    const input = { request: requestBody, signers: [""] }
+    const input: TSSContractInput<AMMRequestBody.Any> = {
+      request: request.body as AMMRequestBody.Any,
+      signers: [signerAccount.publicKey()]
+    }
     const xdr = await contract(input)
+    const transaction = new Transaction(xdr, Networks.TESTNET)
 
-    const signature = signerAccount.sign(xdr).toString("base64")
+    const signature = transaction.getKeypairSignature(signerAccount)
     const signer = signerAccount.publicKey()
 
     const result = { xdr, signer, signature }
