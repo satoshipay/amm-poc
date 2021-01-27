@@ -1,0 +1,1 @@
+../../contracts/dist/main.js

@@ -1,16 +1,21 @@
 import BodyParser from "koa-body"
 import Router from "koa-router"
+import * as path from "path"
 import { Keypair } from "stellar-sdk"
 import { AMMRequestBody } from "../../src/types"
 import { Config } from "./config"
 
 let contract: any = null
 try {
-  contract = require("../contract/main.js")
+  contract = require(path.join(__dirname, "../contract/main.js"))
 } catch (error) {
-  throw Error("No compiled contract found! Please copy a compiled contract to `/test/contract/main.js`.")
+  if (error.code === "MODULE_NOT_FOUND") {
+    throw Error("No compiled contract found! Please link or copy a compiled contract to `test/contract/main.js`.\n")
+  } else {
+    throw error
+  }
 }
-const contractFields = require("../contract/fields.json")
+const contractFields = require(path.join(__dirname, "../contract/fields.json"))
 
 export default function createRouter(config: Config) {
   const router = new Router()
