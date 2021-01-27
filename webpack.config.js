@@ -1,6 +1,12 @@
+const dotenv = require("dotenv")
 const path = require("path")
 const TerserPlugin = require("terser-webpack-plugin")
 const { CleanWebpackPlugin } = require("clean-webpack-plugin")
+const { EnvironmentPlugin } = require("webpack")
+
+dotenv.config({
+  path: path.join(__dirname, ".env")
+})
 
 module.exports = {
   target: "node",
@@ -35,5 +41,8 @@ module.exports = {
     minimize: true,
     minimizer: [new TerserPlugin()],
   },
-  plugins: [new CleanWebpackPlugin()],
+  plugins: [
+    new CleanWebpackPlugin(),
+    new EnvironmentPlugin(["ACCOUNT_ID", "HORIZON_URL"])
+  ],
 }
