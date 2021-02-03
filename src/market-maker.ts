@@ -1,12 +1,12 @@
 import HttpError from "http-errors"
 
 import * as actions from "./actions/index"
-import { AMMRequestBody, TSSContract } from "./types"
+import { AMMRequestBody, ContractActionHandler, TSSContract } from "./types"
 
 const contract: TSSContract<AMMRequestBody.Any> = async function contract(
   { request, signers }
 ) {
-  const handler = actions[request.action]
+  const handler = actions[request.action] as ContractActionHandler<AMMRequestBody.Any>
 
   if (handler) {
     const transaction = await handler(request, signers)

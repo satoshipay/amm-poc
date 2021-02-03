@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.64",
+    "@types/big.js": "^6.0.2",
     "@types/http-errors": "^1.8.0",
     "@types/kcors": "^2.2.3",
     "@types/koa": "^2.11.7",
@@ -34,6 +35,7 @@
   "dependencies": {
     "@godaddy/terminus": "^4.6.0",
     "axios": "^0.21.1",
+    "big.js": "^6.0.3",
     "form-data": "^3.0.0",
     "http-errors": "^1.8.0",
     "kcors": "^2.2.2",

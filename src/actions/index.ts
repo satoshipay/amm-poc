@@ -1,5 +1,9 @@
-import trade from "./trade"
+import deposit from "./deposit"
+import swap from "./swap"
+import withdraw from "./withdraw"
 
 export {
-  trade
+  deposit,
+  swap,
+  withdraw
 }
