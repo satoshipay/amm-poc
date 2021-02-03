@@ -2,12 +2,12 @@ import React from "react"
 import { Horizon } from "stellar-sdk"
 import ProvideLiquidityView from "./Provide"
 import WithdrawLiquidityView from "./Withdraw"
+import SwapLiquidityView from "./Swap"
 import Box from "@material-ui/core/Box"
 import Paper from "@material-ui/core/Paper"
 import makeStyles from "@material-ui/core/styles/makeStyles"
 import Tab from "@material-ui/core/Tab"
 import Tabs from "@material-ui/core/Tabs"
-import Typography from "@material-ui/core/Typography"
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -20,11 +20,7 @@ function TabPanel(props: TabPanelProps) {
 
   return (
     <div role="tabpanel" hidden={value !== index} id={`scrollable-auto-tabpanel-${index}`} {...other}>
-      {value === index && (
-        <Box p={3}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
+      {value === index && <Box p={3}>{children}</Box>}
     </div>
   )
 }
@@ -37,12 +33,13 @@ const useStyles = makeStyles({
 })
 
 interface Props {
+  accountID: string
   balances: Horizon.BalanceLine[]
   testnet: boolean
 }
 
 function LiquidityArea(props: Props) {
-  const { balances, testnet } = props
+  const { accountID, balances, testnet } = props
   const classes = useStyles()
 
   const [selectedTab, setSelectedTab] = React.useState(0)
@@ -62,15 +59,17 @@ function LiquidityArea(props: Props) {
       >
         <Tab label="Provide Liquidity" />
         <Tab label="Withdraw Liquidity" />
-        <Tab label="Trade" />
+        <Tab label="Swap" />
       </Tabs>
       <TabPanel value={selectedTab} index={0}>
-        <ProvideLiquidityView balances={balances} testnet={testnet} />
+        <ProvideLiquidityView accountID={accountID} balances={balances} testnet={testnet} />
       </TabPanel>
       <TabPanel value={selectedTab} index={1}>
-        <WithdrawLiquidityView />
+        <WithdrawLiquidityView accountID={accountID} />
       </TabPanel>
-      <TabPanel value={selectedTab} index={2}></TabPanel>
+      <TabPanel value={selectedTab} index={2}>
+        <SwapLiquidityView accountID={accountID} balances={balances} testnet={testnet} />
+      </TabPanel>
     </Paper>
   )
 }

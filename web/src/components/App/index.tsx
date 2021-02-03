@@ -38,10 +38,10 @@ function App() {
       <Container>
         <Header testnet={testnet} toggleTestnet={() => setTestnet(!testnet)} />
         <SecretKeyInput onAccountSelect={setSelectedAccountKey} />
-        {accountResponse && (
+        {accountResponse && keypair && (
           <>
             <Balances balances={accountResponse.balances} />
-            <LiquidityArea balances={accountResponse.balances} testnet={testnet} />
+            <LiquidityArea accountID={keypair.publicKey()} balances={accountResponse.balances} testnet={testnet} />
           </>
         )}
       </Container>
