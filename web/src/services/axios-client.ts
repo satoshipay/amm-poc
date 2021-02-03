@@ -1,7 +1,8 @@
 import axios from "axios"
+import config from "../config"
 
 const axiosClient = axios.create({
-  baseURL: process.env.REACT_APP_TSS_URL || "http://localhost:3001",
+  baseURL: config.tssURL,
 })
 
 export default axiosClient
