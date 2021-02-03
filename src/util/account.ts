@@ -3,6 +3,8 @@ import BigNumber from "big.js"
 import { AccountResponse, Asset, Horizon } from "stellar-sdk"
 import { config } from "../config"
 
+export const poolSupplyDataEntryKey = "pool.supply"
+
 export function assertMinAccountBalance(account: AccountResponse, asset: Asset, minBalance: BigNumber) {
   const balance = pickBalance(account, asset)
 
@@ -20,6 +22,14 @@ export function getMarketBalancePair(account: AccountResponse): [BigNumber, BigN
   ] as const
 
   return [BigNumber(balancePair[0]), BigNumber(balancePair[1])]
+}
+
+export function getPoolTokenTotal(account: AccountResponse): BigNumber {
+  // It should rather fail if the data entry doesn't exist, but this way
+  // we don't need to set up the initial entry manually
+  return account.data_attr[poolSupplyDataEntryKey]
+    ? BigNumber(account.data_attr[poolSupplyDataEntryKey])
+    : BigNumber(0)
 }
 
 function matchBalance(balance: Horizon.BalanceLine, asset: Asset): boolean {

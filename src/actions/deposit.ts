@@ -3,7 +3,7 @@ import { AccountResponse, Operation, Transaction, TransactionBuilder } from "ste
 import { fetchLiquidityAccount } from "../caches"
 import { config, horizon } from "../config"
 import { AMMRequestBody } from "../types"
-import { getMarketBalancePair, pickBalance } from "../util/account"
+import { getMarketBalancePair, getPoolTokenTotal, poolSupplyDataEntryKey } from "../util/account"
 import { parseAssetIdentifier } from "../util/assets"
 
 async function depositLiquidity(request: AMMRequestBody.Deposit, signers: string[]): Promise<Transaction> {
@@ -40,6 +40,11 @@ async function depositLiquidity(request: AMMRequestBody.Deposit, signers: string
     asset: config.liquidityProviderAsset,
     destination: clientAccount.id,
     source: contractAccount.id
+  }))
+
+  builder.addOperation(Operation.manageData({
+    name: poolSupplyDataEntryKey,
+    value: getPoolTokenTotal(contractAccount).add(deposit.liquidityTokens).toString()
   }))
 
   return builder.setTimeout(config.transactionTimeout).build()
