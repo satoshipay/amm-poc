@@ -2,7 +2,7 @@ import React from "react"
 import { Horizon } from "stellar-sdk"
 import ProvideLiquidityView from "./Provide"
 import WithdrawLiquidityView from "./Withdraw"
-import SwapLiquidityView from "./Swap"
+import SwapView from "./Swap"
 import Box from "@material-ui/core/Box"
 import Paper from "@material-ui/core/Paper"
 import makeStyles from "@material-ui/core/styles/makeStyles"
@@ -34,12 +34,13 @@ const useStyles = makeStyles({
 
 interface Props {
   accountID: string
-  balances: Horizon.BalanceLine[]
+  ammBalances: Horizon.BalanceLine[]
+  userBalances: Horizon.BalanceLine[]
   testnet: boolean
 }
 
 function LiquidityArea(props: Props) {
-  const { accountID, balances, testnet } = props
+  const { accountID, ammBalances, userBalances, testnet } = props
   const classes = useStyles()
 
   const [selectedTab, setSelectedTab] = React.useState(0)
@@ -57,18 +58,18 @@ function LiquidityArea(props: Props) {
         variant="fullWidth"
         value={selectedTab}
       >
+        <Tab label="Swap" />
         <Tab label="Provide Liquidity" />
         <Tab label="Withdraw Liquidity" />
-        <Tab label="Swap" />
       </Tabs>
       <TabPanel value={selectedTab} index={0}>
-        <ProvideLiquidityView accountID={accountID} balances={balances} testnet={testnet} />
+        <SwapView accountID={accountID} ammBalances={ammBalances} userBalances={userBalances} testnet={testnet} />
       </TabPanel>
       <TabPanel value={selectedTab} index={1}>
-        <WithdrawLiquidityView accountID={accountID} />
+        <ProvideLiquidityView accountID={accountID} balances={ammBalances} testnet={testnet} />
       </TabPanel>
       <TabPanel value={selectedTab} index={2}>
-        <SwapLiquidityView accountID={accountID} balances={balances} testnet={testnet} />
+        <WithdrawLiquidityView accountID={accountID} />
       </TabPanel>
     </Paper>
   )

@@ -4,9 +4,14 @@ import Box from "@material-ui/core/Box"
 import Paper from "@material-ui/core/Paper"
 import makeStyles from "@material-ui/core/styles/makeStyles"
 import Typography from "@material-ui/core/Typography"
+import Divider from "@material-ui/core/Divider"
+import List from "@material-ui/core/List"
 
 const useStyles = makeStyles({
   root: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
     marginTop: 8,
     marginBottom: 8,
     padding: 16,
@@ -14,25 +19,46 @@ const useStyles = makeStyles({
   balanceContainer: {
     padding: 8,
   },
+  list: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
 })
 
+function BalanceList(props: { balances: Horizon.BalanceLine[] }) {
+  const classes = useStyles()
+
+  return (
+    <List className={classes.list}>
+      {props.balances.map((balance) => (
+        <Typography key={balance.asset_type} variant="body1">
+          {balance.asset_type === "native" ? "XLM" : balance.asset_code}: {balance.balance}
+        </Typography>
+      ))}
+    </List>
+  )
+}
+
 interface Props {
-  balances: Horizon.BalanceLine[]
+  userBalances: Horizon.BalanceLine[]
+  ammBalances: Horizon.BalanceLine[]
 }
 
 function Balances(props: Props) {
-  const { balances } = props
+  const { ammBalances, userBalances } = props
   const classes = useStyles()
 
   return (
     <Paper className={classes.root}>
-      <Typography variant="h4">Balances</Typography>
       <Box className={classes.balanceContainer}>
-        {balances.map((balance) => (
-          <Typography key={balance.asset_type} variant="body1">
-            {balance.asset_type === "native" ? "XLM" : balance.asset_code}: {balance.balance}
-          </Typography>
-        ))}
+        <Typography variant="h5">User Balances</Typography>
+        <BalanceList balances={userBalances} />
+      </Box>
+      <Divider flexItem orientation="vertical" />
+      <Box className={classes.balanceContainer}>
+        <Typography variant="h5">AMM Balances</Typography>
+        <BalanceList balances={ammBalances} />
       </Box>
     </Paper>
   )

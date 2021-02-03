@@ -6,10 +6,12 @@ import LiquidityArea from "../Liquidity"
 import SecretKeyInput from "../SecretKeyInput"
 import Container from "@material-ui/core/Container"
 import CssBaseline from "@material-ui/core/CssBaseline"
+import config from "../../config"
 
 function App() {
   const [accountKey, setSelectedAccountKey] = useState<string | null>(null)
-  const [accountResponse, setAccountResponse] = React.useState<AccountResponse | null>(null)
+  const [ammAccountResponse, setAmmAccountResponse] = React.useState<AccountResponse | null>(null)
+  const [userAccountResponse, setAccountResponse] = React.useState<AccountResponse | null>(null)
   const [testnet, setTestnet] = useState<boolean>(true)
 
   const horizonURL = React.useMemo(
@@ -18,6 +20,22 @@ function App() {
   )
   const horizon = React.useMemo(() => new Server(horizonURL), [horizonURL])
   const keypair = React.useMemo(() => (accountKey ? Keypair.fromSecret(accountKey) : null), [accountKey])
+
+  React.useEffect(() => {
+    const ammAccount = testnet ? config.marketMakerAccountIdTestnet : config.marketMakerAccountIdMainnet
+
+    if (!ammAccount) {
+      throw Error("No market maker account ID provided.")
+    }
+
+    horizon
+      .loadAccount(ammAccount)
+      .then(setAmmAccountResponse)
+      .catch((e) => {
+        console.error(e)
+        setAccountResponse(null)
+      })
+  }, [horizon, testnet])
 
   React.useEffect(() => {
     if (keypair) {
@@ -38,10 +56,15 @@ function App() {
       <Container>
         <Header testnet={testnet} toggleTestnet={() => setTestnet(!testnet)} />
         <SecretKeyInput onAccountSelect={setSelectedAccountKey} />
-        {accountResponse && keypair && (
+        {ammAccountResponse && userAccountResponse && keypair && (
           <>
-            <Balances balances={accountResponse.balances} />
-            <LiquidityArea accountID={keypair.publicKey()} balances={accountResponse.balances} testnet={testnet} />
+            <Balances ammBalances={ammAccountResponse.balances} userBalances={userAccountResponse.balances} />
+            <LiquidityArea
+              accountID={keypair.publicKey()}
+              ammBalances={ammAccountResponse.balances}
+              userBalances={userAccountResponse.balances}
+              testnet={testnet}
+            />
           </>
         )}
       </Container>
