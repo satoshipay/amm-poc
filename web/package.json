@@ -13,6 +13,7 @@
     "@types/react": "^16.14.2",
     "@types/react-dom": "^16.9.10",
     "axios": "^0.19.2",
+    "big.js": "^5.2.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.1",
@@ -44,6 +45,7 @@
     ]
   },
   "devDependencies": {
+    "@types/big.js": "^6.0.2",
     "husky": "^4.3.6",
     "lint-staged": "^10.5.3",
     "prettier": "^2.2.1",
