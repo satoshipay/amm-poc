@@ -10,6 +10,7 @@ export const config = {
   ] as const,
   horizonUrl: process.env.HORIZON_URL || fail("HORIZON_URL not set"),
   liquidityAccountId: process.env.ACCOUNT_ID || fail("ACCOUNT_ID not set"),
+  liquidityProviderAsset: parseAssetIdentifier(process.env.LP_ASSET || fail("LP_ASSET not set. Expected <pubkey>:<code>")),
   network: Networks.TESTNET,
   tradingFee: new BigNumber(process.env.TRADING_FEE || "1.0"),
   tradingFeeAsset: process.env.TRADING_FEE_ASSET ? parseAssetIdentifier(process.env.TRADING_FEE_ASSET) : Asset.native(),

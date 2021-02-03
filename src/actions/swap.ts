@@ -2,19 +2,17 @@ import { fail } from "assert"
 import BigNumber from "big.js"
 import {
   AccountResponse,
-  Asset,
-  Horizon,
   Operation,
   Transaction,
   TransactionBuilder
 } from "stellar-sdk"
+import { fetchLiquidityAccount } from "../caches"
 import { config, horizon } from "../config"
 import { AMMRequestBody } from "../types"
+import { assertMinAccountBalance, getMarketBalancePair, pickBalance } from "../util/account"
 import { parseAssetIdentifier } from "../util/assets"
 
-const fetchLiquidityAccount = createCachedAccountFetcher(config.liquidityAccountId)
-
-async function performTrade(request: AMMRequestBody.Swap, signers: string[]): Promise<Transaction> {
+async function swap(request: AMMRequestBody.Swap, signers: string[]): Promise<Transaction> {
   // FIXME: Restrict client account ID to non-AMM & non-turret accounts
 
   const [contractAccount, clientAccount] = await Promise.all([
@@ -33,7 +31,7 @@ async function performTrade(request: AMMRequestBody.Swap, signers: string[]): Pr
   builder.addOperation(Operation.payment({
     amount: String(config.tradingFee),
     asset: config.tradingFeeAsset,
-    destination: config.liquidityAccountId,
+    destination: contractAccount.id,
     source: clientAccount.id
   }))
 
@@ -41,7 +39,7 @@ async function performTrade(request: AMMRequestBody.Swap, signers: string[]): Pr
   builder.addOperation(Operation.payment({
     amount: String(trade.in.amount),
     asset: trade.in.asset,
-    destination: config.liquidityAccountId,
+    destination: contractAccount.id,
     source: clientAccount.id
   }))
 
@@ -50,43 +48,16 @@ async function performTrade(request: AMMRequestBody.Swap, signers: string[]): Pr
     amount: String(trade.out.amount),
     asset: trade.out.asset,
     destination: clientAccount.id,
-    source: config.liquidityAccountId
+    source: contractAccount.id
   }))
 
   return builder.setTimeout(config.transactionTimeout).build()
 }
 
-export default performTrade
-
-function createCachedAccountFetcher(accountId: string) {
-  let cachedData: AccountResponse | undefined
-  let lastFetchTime = 0
-
-  return async function fetchAccount(): Promise<AccountResponse> {
-    if (Date.now() - lastFetchTime > 100 || !cachedData) {
-      cachedData = await horizon.loadAccount(accountId)
-      lastFetchTime = Date.now()
-    }
-    return cachedData
-  }
-}
-
-function matchBalance(balance: Horizon.BalanceLine, asset: Asset): boolean {
-  if (balance.asset_type === "native") {
-    return asset.isNative()
-  } else {
-    return (
-      balance.asset_code === config.assetPair[0].code &&
-      balance.asset_issuer === config.assetPair[0].issuer
-    )
-  }
-}
+export default swap
 
 function prepareTrade(account: AccountResponse, request: AMMRequestBody.Swap) {
-  const balancePair = [
-    account.balances.find(balance => matchBalance(balance, (config.assetPair[0])) || fail(`Market maker's account does not hold ${config.assetPair[0].getCode()}`)).balance,
-    account.balances.find(balance => matchBalance(balance, (config.assetPair[1])) || fail(`Market maker's account does not hold ${config.assetPair[1].getCode()}`)).balance
-  ] as const
+  const balancePair = getMarketBalancePair(account)
 
   const trade = {
     in: config.assetPair[0].equals(parseAssetIdentifier(request.in.asset)) ? {
