@@ -27,14 +27,6 @@ async function swap(request: AMMRequestBody.Swap, signers: string[]): Promise<Tr
     networkPassphrase: config.network
   })
 
-  // Payment: user -> contract, <max tx fee> XLM
-  builder.addOperation(Operation.payment({
-    amount: String(config.tradingFee),
-    asset: config.tradingFeeAsset,
-    destination: contractAccount.id,
-    source: clientAccount.id
-  }))
-
   // Payment: user -> contract, <in.amount> <in.asset>
   builder.addOperation(Operation.payment({
     amount: String(trade.in.amount),
@@ -88,8 +80,8 @@ function prepareTrade(account: AccountResponse, request: AMMRequestBody.Swap) {
 
   const rate = trade.in.balance.div(trade.out.balance)
 
-  trade.in.amount = trade.in.amount || new BigNumber(trade.out.amount.mul(rate))
-  trade.out.amount = trade.out.amount || new BigNumber(trade.in.amount.div(rate))
+  trade.in.amount = trade.in.amount || new BigNumber(trade.out.amount.mul(rate).mul(1 - config.fees.swap.percentage / 100))
+  trade.out.amount = trade.out.amount || new BigNumber(trade.in.amount.div(rate).mul(1 - config.fees.swap.percentage / 100))
 
   return trade
 }
