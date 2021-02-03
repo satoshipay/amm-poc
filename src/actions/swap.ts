@@ -4,30 +4,14 @@ import {
   AccountResponse,
   Asset,
   Horizon,
-  Networks,
   Operation,
-  Server,
   Transaction,
   TransactionBuilder
 } from "stellar-sdk"
+import { config, horizon } from "../config"
 import { AMMRequestBody } from "../types"
 import { parseAssetIdentifier } from "../util/assets"
 
-const config = {
-  assetPair: [
-    parseAssetIdentifier(process.env.ASSET_ONE || fail("ASSET_ONE not set. Expected <pubkey>:<code>")),
-    parseAssetIdentifier(process.env.ASSET_TWO || fail("ASSET_TWO not set. Expected <pubkey>:<code>")),
-  ] as const,
-  horizonUrl: process.env.HORIZON_URL || fail("HORIZON_URL not set"),
-  liquidityAccountId: process.env.ACCOUNT_ID || fail("ACCOUNT_ID not set"),
-  network: Networks.TESTNET,
-  tradingFee: new BigNumber(process.env.TRADING_FEE || "1.0"),
-  tradingFeeAsset: process.env.TRADING_FEE_ASSET ? parseAssetIdentifier(process.env.TRADING_FEE_ASSET) : Asset.native(),
-  transactionFeeStroops: Number.parseInt(process.env.TX_FEE_STROOPS || fail("TX_FEE_STROOPS not set"), 10),
-  transactionTimeout: 15
-}
-
-const horizon = new Server(config.horizonUrl)
 const fetchLiquidityAccount = createCachedAccountFetcher(config.liquidityAccountId)
 
 async function performTrade(request: AMMRequestBody.Swap, signers: string[]): Promise<Transaction> {
