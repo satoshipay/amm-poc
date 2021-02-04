@@ -1,6 +1,9 @@
+import { Transaction } from "stellar-sdk"
+
+type AccountID = string
 type Amount = string
 type AssetCode = Uppercase<string>
-type AssetId = `${AssetCode}:${PublicKey}` | "native"
+type AssetId = `${PublicKey}:${AssetCode}` | "native"
 type PublicKey = `G${Uppercase<string>}`
 
 export interface TSSContract<RequestBody> {
@@ -15,22 +18,58 @@ export interface TSSContractInput<RequestBody> {
   signers: string[]
 }
 
+export interface ContractActionHandler<RequestBody> {
+  (request: RequestBody, signers: string[]): Promise<Transaction>
+}
+
 export namespace AMMRequestBody {
   export enum Action {
-    trade = "trade"
+    deposit = "deposit",
+    swap = "swap",
+    withdraw = "withdraw"
   }
 
-  export interface Trade {
-    action: Action.trade
-    in: {
-      amount: Amount
-      asset: AssetId
-    }
-    out: {
-      amount: Amount
-      asset: AssetId
-    }
+  export interface Deposit {
+    action: Action.deposit
+    /**
+     * The amount of one pool asset you are going to deposit.
+     * The amount of the other asset will be calculated based on this one.
+     */
+    amount: Amount
+    /** Must be one of the pool's two assets. */
+    asset: AssetId
+    client: AccountID
   }
 
-  export type Any = Trade
+  export type Swap = {
+    action: Action.swap
+    client: AccountID
+  } & (
+    {
+      in: {
+        asset: AssetId
+      }
+      out: {
+        amount: Amount
+        asset: AssetId
+      }
+    } | {
+      in: {
+        amount: Amount
+        asset: AssetId
+      }
+      out: {
+        asset: AssetId
+      }
+    }
+  )
+
+  export interface Withdraw {
+    action: Action.withdraw
+    /** The amount of liquidity tokens to redeem. */
+    amount: Amount
+    client: AccountID
+  }
+
+  export type Any = Deposit | Swap | Withdraw
 }

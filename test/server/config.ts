@@ -1,3 +1,4 @@
+import { fail } from "assert"
 import { Server } from "stellar-sdk"
 
 export type Config = ReturnType<typeof getConfig>
@@ -7,9 +8,9 @@ const config = {
   horizon: "https://stellar-horizon.satoshipay.io/",
   horizonTestnet: "https://stellar-horizon-testnet.satoshipay.io/",
   port: 3001,
-  signingAccountSecret: process.env.SIGNING_ACCOUNT || "SAEOFJZDDHJX5SPSN23JYF3XK2UWP6LDO4LVT5XDG274WHWF7FZBYDO6",
+  signingAccountSecret: process.env.SIGNING_SECRET_KEY || process.env.TURRET_SECRET_KEY,
   testnet: true,
-  turretAccountSecret: process.env.TURRET_ACCOUNT || "SADEOKHGP5I4KBPP5AOMJWPY32AEP7A6POGKQN74NLO3MGTQT7J36FOA",
+  turretAccountSecret: process.env.TURRET_SECRET_KEY || fail("TURRET_SECRET_KEY not set"),
 }
 
 function getConfig() {

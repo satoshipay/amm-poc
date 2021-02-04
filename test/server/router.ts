@@ -21,8 +21,8 @@ const contractFields = require(path.join(__dirname, "../contract/fields.json"))
 export default function createRouter(config: Config) {
   const router = new Router()
 
-  const turretAccount = Keypair.fromSecret(config.turretAccountSecret)
-  const signerAccount = Keypair.fromSecret(config.signingAccountSecret)
+  const turretKeypair = Keypair.fromSecret(config.turretAccountSecret)
+  const signerKeypair = Keypair.fromSecret(config.signingAccountSecret)
 
   router.use(
     BodyParser({
@@ -32,14 +32,14 @@ export default function createRouter(config: Config) {
 
   router.get("/", async ({ params, request, response }) => {
     const result = {
-      turret: turretAccount.publicKey(),
+      turret: turretKeypair.publicKey(),
       runFee: "0.1",
       uploadFee: "10",
       network: config.testnet ? "TESTNET" : "PUBLIC",
       contracts: [
         {
           contract: "my_contract_hash",
-          signer: signerAccount.publicKey(),
+          signer: signerKeypair.publicKey(),
           fields: contractFields,
         },
       ],
@@ -50,26 +50,38 @@ export default function createRouter(config: Config) {
 
   router.get("/contract/:hash", async ({ params, request, response }) => {
     response.body = {
-      turret: turretAccount.publicKey(),
-      signer: signerAccount.publicKey(),
+      turret: turretKeypair.publicKey(),
+      signer: signerKeypair.publicKey(),
       fee: "0.005",
       fields: contractFields,
     }
   })
 
-  router.post("/contract/:hash", async ({ params, request, response }) => {
+  router.post("/contract/:hash", async ({ request, response }) => {
     const input: TSSContractInput<AMMRequestBody.Any> = {
       request: request.body as AMMRequestBody.Any,
-      signers: [signerAccount.publicKey()]
+      signers: [signerKeypair.publicKey()]
     }
     const xdr = await contract(input)
     const transaction = new Transaction(xdr, Networks.TESTNET)
 
-    const signature = transaction.getKeypairSignature(signerAccount)
-    const signer = signerAccount.publicKey()
+    const signature = transaction.getKeypairSignature(signerKeypair)
+    const signer = signerKeypair.publicKey()
 
     const result = { xdr, signer, signature }
     response.body = result
+  })
+
+  router.post("/test/contract", async ({ request, response }) => {
+    const input: TSSContractInput<AMMRequestBody.Any> = {
+      request: request.body as AMMRequestBody.Any,
+      signers: [signerKeypair.publicKey()]
+    }
+    const xdr = await contract(input)
+    const transaction = new Transaction(xdr, Networks.TESTNET)
+
+    transaction.sign(signerKeypair)
+    response.body = transaction.toEnvelope().toXDR("base64")
   })
 
   router.get("/status/live", (ctx) => {
