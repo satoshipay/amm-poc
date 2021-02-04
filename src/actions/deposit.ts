@@ -1,5 +1,5 @@
 import BigNumber from "big.js"
-import { AccountResponse, Operation, Transaction, TransactionBuilder } from "stellar-sdk"
+import { AccountResponse, Asset, Operation, Transaction, TransactionBuilder } from "stellar-sdk"
 import { fetchLiquidityAccount } from "../caches"
 import { config, horizon } from "../config"
 import { AMMRequestBody } from "../types"
@@ -45,6 +45,14 @@ async function depositLiquidity(request: AMMRequestBody.Deposit, signers: string
   builder.addOperation(Operation.manageData({
     name: poolSupplyDataEntryKey,
     value: getPoolTokenTotal(contractAccount).add(deposit.liquidityTokens).toString()
+  }))
+
+  // Payment: user -> contract, tx fees
+  builder.addOperation(Operation.payment({
+    amount: String(5 * config.transactionFeeStroops * 1e-7),
+    asset: Asset.native(),
+    destination: contractAccount.id,
+    source: clientAccount.id
   }))
 
   return builder.setTimeout(config.transactionTimeout).build()

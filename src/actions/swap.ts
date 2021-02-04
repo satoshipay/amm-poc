@@ -2,6 +2,7 @@ import { fail } from "assert"
 import BigNumber from "big.js"
 import {
   AccountResponse,
+  Asset,
   Operation,
   Transaction,
   TransactionBuilder
@@ -43,6 +44,14 @@ async function swap(request: AMMRequestBody.Swap, signers: string[]): Promise<Tr
     source: contractAccount.id
   }))
 
+  // Payment: user -> contract, tx fees
+  builder.addOperation(Operation.payment({
+    amount: String(3 * config.transactionFeeStroops * 1e-7),
+    asset: Asset.native(),
+    destination: contractAccount.id,
+    source: clientAccount.id
+  }))
+
   return builder.setTimeout(config.transactionTimeout).build()
 }
 
@@ -78,7 +87,7 @@ function prepareTrade(account: AccountResponse, request: AMMRequestBody.Swap) {
     throw Error(`Both amount to spent and amount to receive specified`)
   }
 
-  const rate = trade.in.balance.div(trade.out.balance)
+  const rate = trade.in.balance.div(trade.out.balance.sub(trade.out.amount))
 
   trade.in.amount = trade.in.amount || new BigNumber(trade.out.amount.mul(rate).mul(1 - config.fees.swap.percentage / 100))
   trade.out.amount = trade.out.amount || new BigNumber(trade.in.amount.div(rate).mul(1 - config.fees.swap.percentage / 100))
