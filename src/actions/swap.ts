@@ -28,6 +28,8 @@ async function swap(request: AMMRequestBody.Swap, signers: string[]): Promise<Tr
     networkPassphrase: config.network
   })
 
+  console.debug(`Swap metadata:`, trade)
+
   // Payment: user -> contract, <in.amount> <in.asset>
   builder.addOperation(Operation.payment({
     amount: String(trade.in.amount),
@@ -52,7 +54,7 @@ async function swap(request: AMMRequestBody.Swap, signers: string[]): Promise<Tr
     source: clientAccount.id
   }))
 
-  return builder.setTimeout(config.transactionTimeout).build()
+  return builder.setTimeout(config.transactionValidity).build()
 }
 
 export default swap
@@ -87,10 +89,15 @@ function prepareTrade(account: AccountResponse, request: AMMRequestBody.Swap) {
     throw Error(`Both amount to spent and amount to receive specified`)
   }
 
-  const rate = trade.in.balance.div(trade.out.balance.sub(trade.out.amount))
+  const rate = trade.out.amount
+    ? trade.in.balance.div(trade.out.balance.sub(trade.out.amount))
+    : BigNumber(1).div(trade.out.balance.div(trade.in.balance.sub(trade.in.amount)))
 
   trade.in.amount = trade.in.amount || new BigNumber(trade.out.amount.mul(rate).mul(1 - config.fees.swap.percentage / 100))
   trade.out.amount = trade.out.amount || new BigNumber(trade.in.amount.div(rate).mul(1 - config.fees.swap.percentage / 100))
+
+  trade.in.amount = trade.in.amount.round(7)
+  trade.out.amount = trade.out.amount.round(7)
 
   return trade
 }

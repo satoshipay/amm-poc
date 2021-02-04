@@ -23,21 +23,21 @@ async function withdrawLiquidity(request: AMMRequestBody.Withdraw, signers: stri
   })
 
   builder.addOperation(Operation.payment({
-    amount: withdrawal.liquidityTokens,
+    amount: String(withdrawal.liquidityTokens),
     asset: config.liquidityProviderAsset,
     destination: contractAccount.id,
     source: clientAccount.id
   }))
 
   builder.addOperation(Operation.payment({
-    amount: withdrawal.poolTokens[0].toString(),
+    amount: String(withdrawal.poolTokens[0]),
     asset: config.assetPair[0],
     destination: clientAccount.id,
     source: contractAccount.id
   }))
 
   builder.addOperation(Operation.payment({
-    amount: withdrawal.poolTokens[1].toString(),
+    amount: String(withdrawal.poolTokens[1]),
     asset: config.assetPair[1],
     destination: clientAccount.id,
     source: contractAccount.id
@@ -50,13 +50,13 @@ async function withdrawLiquidity(request: AMMRequestBody.Withdraw, signers: stri
 
   // Payment: user -> contract, tx fees
   builder.addOperation(Operation.payment({
-    amount: String(5 * config.transactionFeeStroops * 1e-7),
+    amount: String(BigNumber(5 * config.transactionFeeStroops * 1e-7).round(7)),
     asset: Asset.native(),
     destination: contractAccount.id,
     source: clientAccount.id
   }))
 
-  return builder.setTimeout(config.transactionTimeout).build()
+  return builder.setTimeout(config.transactionValidity).build()
 }
 
 export default withdrawLiquidity
@@ -66,10 +66,10 @@ function prepareWithdrawal(account: AccountResponse, request: AMMRequestBody.Wit
   const supply = getPoolTokenTotal(account)
 
   const withdrawal = {
-    liquidityTokens: request.amount,
+    liquidityTokens: BigNumber(request.amount).round(7),
     poolTokens: [
-      balancePair[0].mul(BigNumber(request.amount).div(supply)),
-      balancePair[1].mul(BigNumber(request.amount).div(supply))
+      balancePair[0].mul(BigNumber(request.amount).div(supply)).round(7),
+      balancePair[1].mul(BigNumber(request.amount).div(supply)).round(7)
     ]
   } as const
 

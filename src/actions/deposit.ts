@@ -22,21 +22,21 @@ async function depositLiquidity(request: AMMRequestBody.Deposit, signers: string
   })
 
   builder.addOperation(Operation.payment({
-    amount: deposit.depositAmounts[0].toString(),
+    amount: String(deposit.depositAmounts[0]),
     asset: config.assetPair[0],
     destination: contractAccount.id,
     source: clientAccount.id
   }))
 
   builder.addOperation(Operation.payment({
-    amount: deposit.depositAmounts[1].toString(),
+    amount: String(deposit.depositAmounts[1]),
     asset: config.assetPair[1],
     destination: contractAccount.id,
     source: clientAccount.id
   }))
 
   builder.addOperation(Operation.payment({
-    amount: deposit.liquidityTokens.toString(),
+    amount: String(deposit.liquidityTokens),
     asset: config.liquidityProviderAsset,
     destination: clientAccount.id,
     source: contractAccount.id
@@ -44,18 +44,18 @@ async function depositLiquidity(request: AMMRequestBody.Deposit, signers: string
 
   builder.addOperation(Operation.manageData({
     name: poolSupplyDataEntryKey,
-    value: getPoolTokenTotal(contractAccount).add(deposit.liquidityTokens).toString()
+    value: String(getPoolTokenTotal(contractAccount).add(deposit.liquidityTokens))
   }))
 
   // Payment: user -> contract, tx fees
   builder.addOperation(Operation.payment({
-    amount: String(5 * config.transactionFeeStroops * 1e-7),
+    amount: String(BigNumber(5 * config.transactionFeeStroops * 1e-7).round(7)),
     asset: Asset.native(),
     destination: contractAccount.id,
     source: clientAccount.id
   }))
 
-  return builder.setTimeout(config.transactionTimeout).build()
+  return builder.setTimeout(config.transactionValidity).build()
 }
 
 export default depositLiquidity
@@ -74,9 +74,9 @@ function prepareDeposit(account: AccountResponse, request: AMMRequestBody.Deposi
   const depositAmounts = [
     depositIntent.asset.equals(config.assetPair[0])
       ? depositIntent.amount
-      : depositIntent.amount.mul(balancePair[0]).div(balancePair[1]),
+      : depositIntent.amount.mul(balancePair[0]).div(balancePair[1]).round(7),
     depositIntent.asset.equals(config.assetPair[0])
-      ? depositIntent.amount.mul(balancePair[1]).div(balancePair[0])
+      ? depositIntent.amount.mul(balancePair[1]).div(balancePair[0]).round(7)
       : depositIntent.amount
   ] as const
 
@@ -85,9 +85,11 @@ function prepareDeposit(account: AccountResponse, request: AMMRequestBody.Deposi
     balancePair[1].add(depositAmounts[1])
   ] as const
 
+  const liquidityTokens = postDepositPoolBalances[0].mul(postDepositPoolBalances[1]).div(depositAmounts[0].mul(depositAmounts[1]))
+
   const deposit = {
     depositAmounts,
-    liquidityTokens: postDepositPoolBalances[0].mul(postDepositPoolBalances[1]).div(depositAmounts[0].mul(depositAmounts[1]))
+    liquidityTokens: liquidityTokens.round(2, 0 /* round down */)
   } as const
 
   return deposit

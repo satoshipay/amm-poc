@@ -1,7 +1,7 @@
 import { AccountResponse } from "stellar-sdk"
 import { config, horizon } from "./config"
 
-export const fetchLiquidityAccount = createCachedAccountFetcher(config.liquidityAccountId)
+export const fetchLiquidityAccount = createCachedAccountFetcher(config.poolAccountId)
 
 function createCachedAccountFetcher(accountId: string) {
   let cachedData: AccountResponse | undefined
