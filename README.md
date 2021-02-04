@@ -4,7 +4,9 @@ Primitive prototype of an AMM for Stellar built using [Turing Signing Servers](h
 
 ## Usage
 
-## Known limitations
+## Known issues
+
+👉 [**Known issues**](./KNOWN-ISSUES.md)
 
 ## Build
 
