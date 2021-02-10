@@ -22,32 +22,46 @@ function App() {
   const keypair = React.useMemo(() => (accountKey ? Keypair.fromSecret(accountKey) : null), [accountKey])
 
   React.useEffect(() => {
-    const ammAccount = testnet ? config.marketMakerAccountIdTestnet : config.marketMakerAccountIdMainnet
+    const fetchAccount = () => {
+      const ammAccount = testnet ? config.marketMakerAccountIdTestnet : config.marketMakerAccountIdMainnet
 
-    if (!ammAccount) {
-      throw Error("No market maker account ID provided.")
-    }
+      if (!ammAccount) {
+        throw Error("No market maker account ID provided.")
+      }
 
-    horizon
-      .loadAccount(ammAccount)
-      .then(setAmmAccountResponse)
-      .catch((e) => {
-        console.error(e)
-        setAccountResponse(null)
-      })
-  }, [horizon, testnet])
-
-  React.useEffect(() => {
-    if (keypair) {
       horizon
-        .loadAccount(keypair.publicKey())
-        .then(setAccountResponse)
+        .loadAccount(ammAccount)
+        .then(setAmmAccountResponse)
         .catch((e) => {
-          // tslint:disable-next-line: no-console
           console.error(e)
           setAccountResponse(null)
         })
     }
+
+    fetchAccount()
+
+    const interval = setInterval(fetchAccount, 5000)
+    return () => clearInterval(interval)
+  }, [horizon, testnet])
+
+  React.useEffect(() => {
+    const fetchAccount = () => {
+      if (keypair) {
+        horizon
+          .loadAccount(keypair.publicKey())
+          .then(setAccountResponse)
+          .catch((e) => {
+            // tslint:disable-next-line: no-console
+            console.error(e)
+            setAccountResponse(null)
+          })
+      }
+    }
+
+    fetchAccount()
+
+    const interval = setInterval(fetchAccount, 5000)
+    return () => clearInterval(interval)
   }, [keypair, horizon])
 
   return (
@@ -60,9 +74,10 @@ function App() {
           <>
             <Balances ammBalances={ammAccountResponse.balances} userBalances={userAccountResponse.balances} />
             <LiquidityArea
-              accountID={keypair.publicKey()}
+              accountKeypair={keypair}
               ammBalances={ammAccountResponse.balances}
               userBalances={userAccountResponse.balances}
+              horizon={horizon}
               testnet={testnet}
             />
           </>
