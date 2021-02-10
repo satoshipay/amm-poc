@@ -15,7 +15,6 @@ export async function getContract(hash: string) {
 export async function runContract(hash: string, data: any) {
   try {
     const response = await axios.post(`${baseUrl}/contract/${hash}`, data)
-    console.log(response)
     return response.data
   } catch (error) {
     if (error.response) {

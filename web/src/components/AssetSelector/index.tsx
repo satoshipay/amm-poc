@@ -1,10 +1,10 @@
-import React from "react"
-import { Asset, Horizon } from "stellar-sdk"
-import { balancelineToAsset, stringifyAsset } from "../../lib/stellar"
 import ListItemText from "@material-ui/core/ListItemText"
 import MenuItem from "@material-ui/core/MenuItem"
 import { makeStyles } from "@material-ui/core/styles"
 import TextField, { TextFieldProps } from "@material-ui/core/TextField"
+import React from "react"
+import { Asset, Horizon } from "stellar-sdk"
+import { balancelineToAsset, stringifyAsset } from "../../lib/stellar"
 
 interface AssetItemProps {
   asset: Asset
@@ -49,6 +49,7 @@ interface AssetSelectorProps {
   assets: (Asset | Horizon.BalanceLine)[]
   children?: React.ReactNode
   className?: string
+  disabled?: boolean
   disabledAssets?: Asset[]
   disableUnderline?: boolean
   helperText?: TextFieldProps["helperText"]
@@ -100,6 +101,7 @@ function AssetSelector(props: AssetSelectorProps) {
     <TextField
       autoFocus={props.autoFocus}
       className={props.className}
+      disabled={props.disabled}
       error={Boolean(props.inputError)}
       helperText={props.helperText}
       label={props.inputError ? props.inputError : props.label}
