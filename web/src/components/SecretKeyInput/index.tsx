@@ -51,7 +51,7 @@ function SecretKeyInput(props: Props) {
   return (
     <Paper className={classes.root}>
       <Typography color="textPrimary" style={{ marginLeft: 8 }} variant="h6">
-        Enter your client account secret key
+        Enter your user account secret key
       </Typography>
       <Box className={classes.textFieldContainer} display="flex">
         <TextField

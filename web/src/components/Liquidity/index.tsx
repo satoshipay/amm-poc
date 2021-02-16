@@ -57,13 +57,15 @@ function LiquidityArea(props: Props) {
 
   const submitTransaction = (transaction: Transaction) => {
     transaction.sign(accountKeypair)
-    console.log("Submitting transaction", transaction)
-    horizon
+    console.debug("Submitting transaction:", transaction)
+
+    return horizon
       .submitTransaction(transaction)
       .then(() => showNotification({ message: "Transaction submitted to network", severity: "success" }))
       .catch((error) => {
         console.error(error)
         showNotification({ message: "Transaction submission failed", severity: "error" })
+        throw error
       })
   }
 
@@ -98,6 +100,7 @@ function LiquidityArea(props: Props) {
         <ProvideLiquidityView
           accountID={accountID}
           balancePair={balancePair}
+          poolTokenTotal={poolTokenTotal}
           submitTransaction={submitTransaction}
           testnet={testnet}
         />

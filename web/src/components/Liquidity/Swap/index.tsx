@@ -1,10 +1,11 @@
 import Box from "@material-ui/core/Box"
 import Button from "@material-ui/core/Button"
-import SwapVertIcon from "@material-ui/icons/SwapVert"
+import CircularProgress from "@material-ui/core/CircularProgress"
 import BigNumber from "big.js"
 import React from "react"
 import { Asset, Networks, Transaction } from "stellar-sdk"
 import config from "../../../config"
+import { usePromiseTracker } from "../../../lib/promises"
 import { stringifyAsset } from "../../../lib/stellar"
 import { BalancePair } from "../../../lib/utils"
 import { runContract } from "../../../services/tss"
@@ -57,7 +58,7 @@ function calculateSwap(tradeIn: boolean, amount: string, assetIn: Asset, assetOu
 interface Props {
   accountID: string
   balancePair: BalancePair
-  submitTransaction: (transaction: Transaction) => void
+  submitTransaction: (transaction: Transaction) => Promise<unknown>
   testnet: boolean
 }
 
@@ -74,6 +75,7 @@ function SwapView(props: Props) {
   const selectableAssets = [config.assetOne, config.assetTwo]
 
   const [mode, setMode] = React.useState<"in" | "out">("in")
+  const submission = usePromiseTracker()
 
   React.useEffect(() => {
     if (amount && assetIn && assetOut) {
@@ -96,25 +98,28 @@ function SwapView(props: Props) {
 
   const onProvideClick = React.useCallback(() => {
     if (assetIn && assetOut && amount) {
-      runContract("to-the-moon", {
-        action: "swap",
-        client: accountID,
-        in: {
-          asset: stringifyAsset(assetIn),
-          amount: mode === "in" ? amount : undefined,
-        },
-        out: {
-          asset: stringifyAsset(assetOut),
-          amount: mode === "out" ? amount : undefined,
-        },
-      })
-        .then((response) => {
-          const { signature, signer, xdr } = response
-          const tx = new Transaction(xdr, networkPassphrase)
-          tx.addSignature(signer, signature)
-          submitTransaction(tx)
+      submission.track(
+        runContract("to-the-moon", {
+          action: "swap",
+          client: accountID,
+          in: {
+            asset: stringifyAsset(assetIn),
+            amount: mode === "in" ? amount : undefined,
+          },
+          out: {
+            asset: stringifyAsset(assetOut),
+            amount: mode === "out" ? amount : undefined,
+          },
         })
-        .catch(console.error)
+          .then((response) => {
+            const { signature, signer, xdr } = response
+            const tx = new Transaction(xdr, networkPassphrase)
+            tx.addSignature(signer, signature)
+
+            return submitTransaction(tx)
+          })
+          .catch(console.error)
+      )
     }
   }, [accountID, amount, assetIn, assetOut, mode, networkPassphrase, submitTransaction])
 
@@ -137,7 +142,7 @@ function SwapView(props: Props) {
           />
         }
         fullWidth
-        label={mode === "in" ? "From" : "To"}
+        label={mode === "in" ? "You spend" : "You receive"}
         margin="normal"
         placeholder={mode === "in" ? "Amount you want to spend" : "Amount you expect to receive"}
         type="number"
@@ -157,7 +162,7 @@ function SwapView(props: Props) {
         }
         disabled
         fullWidth
-        label={mode === "in" ? "To" : "From"}
+        label={mode === "in" ? "You receive" : "You spend"}
         margin="normal"
         placeholder={
           mode === "in" ? "Amount of the asset you want to put in" : "Amount of the asset you want to get out"
@@ -165,7 +170,14 @@ function SwapView(props: Props) {
         type="number"
         value={returnedAmount}
       />
-      <Button color="primary" disabled={disabled} variant="outlined" style={{ marginTop: 16 }} onClick={onProvideClick}>
+      <Button
+        color="primary"
+        disabled={disabled}
+        variant="outlined"
+        startIcon={submission.state === "pending" ? <CircularProgress size={16} /> : null}
+        style={{ marginTop: 16 }}
+        onClick={onProvideClick}
+      >
         Swap Assets
       </Button>
     </Box>

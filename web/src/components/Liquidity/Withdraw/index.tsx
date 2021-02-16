@@ -1,10 +1,12 @@
 import { Typography } from "@material-ui/core"
 import Box from "@material-ui/core/Box"
 import Button from "@material-ui/core/Button"
+import CircularProgress from "@material-ui/core/CircularProgress"
 import BigNumber from "big.js"
 import React from "react"
 import { Networks, Transaction } from "stellar-sdk"
 import config from "../../../config"
+import { usePromiseTracker } from "../../../lib/promises"
 import { BalancePair } from "../../../lib/utils"
 import { runContract } from "../../../services/tss"
 import AssetSelector from "../../AssetSelector"
@@ -26,7 +28,7 @@ interface Props {
   accountID: string
   balancePair: BalancePair
   poolTokenTotal: BigNumber
-  submitTransaction: (transaction: Transaction) => void
+  submitTransaction: (transaction: Transaction) => Promise<unknown>
   testnet: boolean
 }
 
@@ -34,9 +36,9 @@ function WithdrawLiquidityView(props: Props) {
   const { accountID, balancePair, poolTokenTotal, submitTransaction, testnet } = props
   const [amount, setAmount] = React.useState("")
   const [expectedTokens, setExpectedTokens] = React.useState<BalancePair | null>(null)
+  const submission = usePromiseTracker()
 
   const networkPassphrase = testnet ? Networks.TESTNET : Networks.PUBLIC
-
   const selectableAssets = [config.liquidityProviderAsset]
 
   React.useEffect(() => {
@@ -53,18 +55,21 @@ function WithdrawLiquidityView(props: Props) {
   }, [amount, balancePair, poolTokenTotal])
 
   const onWithdrawClick = React.useCallback(() => {
-    runContract("to-the-moon", {
-      action: "withdraw",
-      amount: String(amount),
-      client: accountID,
-    })
-      .then((response) => {
-        const { signature, signer, xdr } = response
-        const tx = new Transaction(xdr, networkPassphrase)
-        tx.addSignature(signer, signature)
-        submitTransaction(tx)
+    submission.track(
+      runContract("to-the-moon", {
+        action: "withdraw",
+        amount: String(amount),
+        client: accountID,
       })
-      .catch(console.error)
+        .then((response) => {
+          const { signature, signer, xdr } = response
+          const tx = new Transaction(xdr, networkPassphrase)
+          tx.addSignature(signer, signature)
+
+          return submitTransaction(tx)
+        })
+        .catch(console.error)
+    )
   }, [accountID, amount, networkPassphrase, submitTransaction])
 
   return (
@@ -87,8 +92,8 @@ function WithdrawLiquidityView(props: Props) {
         onChange={(e) => setAmount(e.target.value)}
       />
       {expectedTokens && (
-        <Box textAlign="center" style={{ marginTop: 16 }}>
-          <Typography variant="h6">Estimated returns</Typography>
+        <Box margin="24px 0 16px" textAlign="center">
+          <Typography variant="h6">Estimated return</Typography>
           <Typography>
             {String(expectedTokens[0])} {config.assetOne.code}
           </Typography>
@@ -97,7 +102,14 @@ function WithdrawLiquidityView(props: Props) {
           </Typography>
         </Box>
       )}
-      <Button color="primary" disabled={!amount} onClick={onWithdrawClick} variant="outlined" style={{ marginTop: 16 }}>
+      <Button
+        color="primary"
+        disabled={!amount}
+        onClick={onWithdrawClick}
+        variant="outlined"
+        startIcon={submission.state === "pending" ? <CircularProgress size={16} /> : null}
+        style={{ marginTop: 16 }}
+      >
         Withdraw
       </Button>
     </Box>

@@ -1,17 +1,24 @@
 import { Typography } from "@material-ui/core"
 import Box from "@material-ui/core/Box"
 import Button from "@material-ui/core/Button"
+import CircularProgress from "@material-ui/core/CircularProgress"
 import BigNumber from "big.js"
 import React from "react"
 import { Asset, Networks, Transaction } from "stellar-sdk"
 import config from "../../../config"
+import { usePromiseTracker } from "../../../lib/promises"
 import { stringifyAsset } from "../../../lib/stellar"
 import { BalancePair } from "../../../lib/utils"
 import { runContract } from "../../../services/tss"
 import AssetSelector from "../../AssetSelector"
 import AssetTextField from "../../AssetTextField"
 
-function calculateDeposit(asset: Asset, amount: string, balancePair: [BigNumber, BigNumber]) {
+function calculateDeposit(
+  asset: Asset,
+  amount: string,
+  balancePair: [BigNumber, BigNumber],
+  poolTokenTotal: BigNumber
+) {
   const depositIntent = {
     amount: BigNumber(amount),
     asset,
@@ -26,14 +33,7 @@ function calculateDeposit(asset: Asset, amount: string, balancePair: [BigNumber,
       : depositIntent.amount,
   ] as const
 
-  const postDepositPoolBalances = [
-    balancePair[0].add(depositAmounts[0]),
-    balancePair[1].add(depositAmounts[1]),
-  ] as const
-
-  const liquidityTokens = postDepositPoolBalances[0]
-    .mul(postDepositPoolBalances[1])
-    .div(depositAmounts[0].mul(depositAmounts[1]))
+  const liquidityTokens = depositAmounts[0].mul(poolTokenTotal).div(balancePair[0])
 
   const deposit = {
     depositAmounts,
@@ -46,15 +46,15 @@ function calculateDeposit(asset: Asset, amount: string, balancePair: [BigNumber,
 interface Props {
   accountID: string
   balancePair: BalancePair
-  submitTransaction: (transaction: Transaction) => void
+  submitTransaction: (transaction: Transaction) => Promise<unknown>
   testnet: boolean
+  poolTokenTotal: BigNumber
 }
 
 function ProvideLiquidityView(props: Props) {
-  const { accountID, balancePair, submitTransaction, testnet } = props
+  const { accountID, balancePair, submitTransaction, testnet, poolTokenTotal } = props
 
   const networkPassphrase = testnet ? Networks.TESTNET : Networks.PUBLIC
-
   const selectableAssets = [config.assetOne, config.assetTwo]
 
   const [userAmount, setUserAmount] = React.useState("")
@@ -62,11 +62,12 @@ function ProvideLiquidityView(props: Props) {
   const [asset1, setAsset1] = React.useState<Asset>(config.assetOne)
   const [asset2, setAsset2] = React.useState<Asset>(config.assetTwo)
   const [estimatedLPT, setEstimatedLPT] = React.useState("")
+  const submission = usePromiseTracker()
 
   React.useEffect(() => {
     if (userAmount) {
       try {
-        const result = calculateDeposit(asset1, userAmount, balancePair)
+        const result = calculateDeposit(asset1, userAmount, balancePair, poolTokenTotal)
 
         if (asset1.equals(config.assetOne)) {
           setCalculatedAmount(String(result.depositAmounts[1]))
@@ -85,20 +86,22 @@ function ProvideLiquidityView(props: Props) {
   }, [userAmount, asset1, balancePair])
 
   const onProvideClick = React.useCallback(() => {
-    runContract("to-the-moon", {
-      action: "deposit",
-      amount: String(userAmount),
-      asset: stringifyAsset(asset1),
-      client: accountID,
-    })
-      .then((response) => {
-        const { signature, signer, xdr } = response
-        const tx = new Transaction(xdr, networkPassphrase)
-        tx.addSignature(signer, signature)
-
-        submitTransaction(tx)
+    submission.track(
+      runContract("to-the-moon", {
+        action: "deposit",
+        amount: String(userAmount),
+        asset: stringifyAsset(asset1),
+        client: accountID,
       })
-      .catch(console.error)
+        .then((response) => {
+          const { signature, signer, xdr } = response
+          const tx = new Transaction(xdr, networkPassphrase)
+          tx.addSignature(signer, signature)
+
+          return submitTransaction(tx)
+        })
+        .catch(console.error)
+    )
   }, [accountID, userAmount, asset1, networkPassphrase, submitTransaction])
 
   return (
@@ -139,13 +142,14 @@ function ProvideLiquidityView(props: Props) {
         value={calculatedAmount}
       />
       {estimatedLPT && (
-        <Typography variant="h6" style={{ marginTop: 16 }}>
+        <Typography style={{ margin: "24px 0 16px" }} variant="h6">
           Estimated return: {estimatedLPT} {config.liquidityProviderAsset.code}
         </Typography>
       )}
       <Button
         color="primary"
         disabled={!userAmount}
+        startIcon={submission.state === "pending" ? <CircularProgress size={16} /> : null}
         variant="outlined"
         style={{ marginTop: 16 }}
         onClick={onProvideClick}

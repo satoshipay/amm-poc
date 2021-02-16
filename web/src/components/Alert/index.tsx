@@ -44,7 +44,7 @@ function CustomizedSnackbar(props: Props) {
   return (
     <div className={classes.root}>
       {locNotification && (
-        <Snackbar open autoHideDuration={6000} onClose={handleClose}>
+        <Snackbar open autoHideDuration={3000} onClose={handleClose}>
           <Alert severity={locNotification.severity}>{locNotification.message}</Alert>
         </Snackbar>
       )}
