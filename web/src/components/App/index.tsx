@@ -16,20 +16,16 @@ function App() {
   const [accountKey, setSelectedAccountKey] = useState<string | null>(null)
   const [ammAccountResponse, setAmmAccountResponse] = React.useState<AccountResponse | null>(null)
   const [userAccountResponse, setAccountResponse] = React.useState<AccountResponse | null>(null)
-  const [testnet, setTestnet] = useState<boolean>(true)
 
   const [error, setError] = React.useState<string | null>(null)
 
-  const horizonURL = React.useMemo(
-    () => (testnet ? "https://stellar-horizon-testnet.satoshipay.io" : "https://stellar-horizon.satoshipay.io"),
-    [testnet]
-  )
+  const horizonURL = "https://stellar-horizon-testnet.satoshipay.io"
   const horizon = React.useMemo(() => new Server(horizonURL), [horizonURL])
   const keypair = React.useMemo(() => (accountKey ? Keypair.fromSecret(accountKey) : null), [accountKey])
 
   React.useEffect(() => {
     const fetchAccount = () => {
-      const ammAccount = testnet ? config.marketMakerAccountIdTestnet : config.marketMakerAccountIdMainnet
+      const ammAccount = config.marketMakerAccountIdTestnet
 
       if (!ammAccount) {
         throw Error("No market maker account ID provided.")
@@ -48,7 +44,7 @@ function App() {
 
     const interval = setInterval(fetchAccount, 5000)
     return () => clearInterval(interval)
-  }, [horizon, testnet])
+  }, [horizon])
 
   React.useEffect(() => {
     const fetchAccount = () => {
@@ -100,7 +96,7 @@ function App() {
     <>
       <CssBaseline />
       <Container>
-        <Header testnet={testnet} toggleTestnet={() => setTestnet(!testnet)} />
+        <Header />
         <SecretKeyInput onAccountSelect={setSelectedAccountKey} />
         {ammAccountResponse && userAccountResponse && keypair && (
           <>
@@ -111,7 +107,7 @@ function App() {
                 ammBalances={ammAccountResponse.balances}
                 poolTokenTotal={poolTokenTotal}
                 horizon={horizon}
-                testnet={testnet}
+                testnet
               />
             ) : (
               <Typography color="error">{error}</Typography>
