@@ -1,11 +1,9 @@
 import BigNumber from "big.js"
 import { AccountResponse, Asset, Operation, Transaction, TransactionBuilder } from "stellar-sdk"
-import { withdraw } from "."
 import { fetchLiquidityAccount } from "../caches"
 import { config, horizon } from "../config"
 import { AMMRequestBody } from "../types"
-import { getMarketBalancePair, getPoolTokenTotal, pickBalance, poolSupplyDataEntryKey } from "../util/account"
-import { parseAssetIdentifier } from "../util/assets"
+import { getMarketBalancePair, getPoolTokenTotal, poolSupplyDataEntryKey } from "../util/account"
 
 async function withdrawLiquidity(request: AMMRequestBody.Withdraw, signers: string[]): Promise<Transaction> {
   // FIXME: Restrict client account ID to non-AMM & non-turret accounts
