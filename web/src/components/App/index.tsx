@@ -95,7 +95,7 @@ function App() {
   return (
     <>
       <CssBaseline />
-      <Container>
+      <Container maxWidth="md">
         <Header />
         <SecretKeyInput onAccountSelect={setSelectedAccountKey} />
         {ammAccountResponse && userAccountResponse && keypair && (

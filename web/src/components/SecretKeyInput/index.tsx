@@ -51,7 +51,7 @@ function SecretKeyInput(props: Props) {
   return (
     <Paper className={classes.root}>
       <Typography color="textPrimary" variant="h6">
-        Choose the account that you want to use.
+        Enter your client account secret key
       </Typography>
       <Box className={classes.textFieldContainer} display="flex">
         <TextField

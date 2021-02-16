@@ -34,7 +34,10 @@ function BalanceList(props: { balances: Horizon.BalanceLine[] }) {
     <List className={classes.list}>
       {props.balances.map((balance) => (
         <Typography key={stringifyAsset(balance)} variant="body1">
-          {balance.asset_type === "native" ? "XLM" : balance.asset_code}: {balance.balance}
+          <b style={{ display: "inline-block", minWidth: "5em" }}>
+            {balance.asset_type === "native" ? "XLM" : balance.asset_code}
+          </b>
+          {balance.balance}
         </Typography>
       ))}
     </List>
@@ -53,7 +56,9 @@ function Balances(props: Props) {
   return (
     <Paper className={classes.root}>
       <Box className={classes.balanceContainer}>
-        <Typography variant="h5">User Balances</Typography>
+        <Typography align="center" gutterBottom variant="h5">
+          User Balances
+        </Typography>
         <BalanceList balances={userBalances} />
       </Box>
       <Divider flexItem orientation="vertical" />
