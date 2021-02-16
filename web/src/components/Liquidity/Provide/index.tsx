@@ -118,7 +118,7 @@ function ProvideLiquidityView(props: Props) {
           />
         }
         fullWidth
-        label="Input 1"
+        label={`Amount ${asset1.getCode()}`}
         placeholder="Amount of tokens you want to deposit"
         type="number"
         value={userAmount}
@@ -133,7 +133,7 @@ function ProvideLiquidityView(props: Props) {
         }
         disabled
         fullWidth
-        label="Input 2"
+        label={`Amount ${asset2.getCode()}`}
         placeholder="Amount of tokens you want to deposit"
         type="number"
         value={calculatedAmount}

@@ -138,25 +138,12 @@ function SwapView(props: Props) {
         }
         fullWidth
         label={mode === "in" ? "From" : "To"}
-        placeholder={
-          mode === "in" ? "Amount of the asset you want to put in" : "Amount of the asset you want to get out"
-        }
+        margin="normal"
+        placeholder={mode === "in" ? "Amount you want to spend" : "Amount you expect to receive"}
         type="number"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
       />
-      <Button
-        color="secondary"
-        startIcon={<SwapVertIcon />}
-        onClick={swapMode}
-        variant="outlined"
-        style={{
-          marginTop: 16,
-          marginBottom: 16,
-        }}
-      >
-        Switch In/Out
-      </Button>
       <AssetTextField
         assetCode={
           <AssetSelector
@@ -171,6 +158,7 @@ function SwapView(props: Props) {
         disabled
         fullWidth
         label={mode === "in" ? "To" : "From"}
+        margin="normal"
         placeholder={
           mode === "in" ? "Amount of the asset you want to put in" : "Amount of the asset you want to get out"
         }

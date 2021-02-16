@@ -81,6 +81,7 @@ function WithdrawLiquidityView(props: Props) {
         }
         fullWidth
         label="Pool Tokens"
+        placeholder="Amount to redeem"
         type="number"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
