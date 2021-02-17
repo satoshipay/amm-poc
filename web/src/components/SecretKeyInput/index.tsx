@@ -50,18 +50,23 @@ function SecretKeyInput(props: Props) {
 
   return (
     <Paper className={classes.root}>
-      <Typography color="textPrimary" variant="h6">
-        Choose the account that you want to use.
+      <Typography color="textPrimary" style={{ marginLeft: 8 }} variant="h6">
+        Enter your user account secret key
       </Typography>
       <Box className={classes.textFieldContainer} display="flex">
         <TextField
           error={Boolean(error)}
+          fullWidth
           label={error ? error : "Secret Key"}
           margin="normal"
           onChange={(e) => setValue(e.target.value.toLocaleUpperCase())}
           placeholder="SABC..."
+          style={{
+            fontFamily: "monospace",
+            marginRight: 16,
+          }}
+          type="password"
           value={value}
-          fullWidth
         />
         <Button className={classes.button} color="primary" onClick={connect} size="small" variant="outlined">
           Connect

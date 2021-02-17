@@ -2,25 +2,10 @@
   "name": "amm-ui",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@material-ui/core": "^4.11.2",
-    "@testing-library/jest-dom": "^5.11.6",
-    "@testing-library/react": "^11.2.2",
-    "@testing-library/user-event": "^12.6.0",
-    "@types/jest": "^26.0.19",
-    "@types/node": "^12.19.11",
-    "@types/react": "^16.14.2",
-    "@types/react-dom": "^16.9.10",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-scripts": "4.0.1",
-    "stellar-sdk": "^7.0.0",
-    "typescript": "^4.1.3"
-  },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "set -a && source ../.env && SKIP_PREFLIGHT_CHECK=true react-scripts start",
+    "build": "set -a && source ../.env && react-scripts build",
+    "test": "set -a && source ../.env && react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -41,7 +26,27 @@
       "last 1 safari version"
     ]
   },
+  "dependencies": {
+    "@material-ui/core": "^4.11.2",
+    "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.57",
+    "@testing-library/jest-dom": "^5.11.6",
+    "@testing-library/react": "^11.2.2",
+    "@testing-library/user-event": "^12.6.0",
+    "@types/jest": "^26.0.19",
+    "@types/node": "^12.19.11",
+    "@types/react": "^16.14.2",
+    "@types/react-dom": "^16.9.10",
+    "axios": "^0.21.1",
+    "big.js": "^5.2.2",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-scripts": "4.0.1",
+    "stellar-sdk": "^8.0.0",
+    "typescript": "^4.1.3"
+  },
   "devDependencies": {
+    "@types/big.js": "^6.0.2",
     "husky": "^4.3.6",
     "lint-staged": "^10.5.3",
     "prettier": "^2.2.1",

@@ -47,8 +47,9 @@ async function swap(request: AMMRequestBody.Swap, signers: string[]): Promise<Tr
   }))
 
   // Payment: user -> contract, tx fees
+  const trimmedFeeAmount = BigNumber(3 * config.transactionFeeStroops * 1e-7).toFixed(7)
   builder.addOperation(Operation.payment({
-    amount: String(3 * config.transactionFeeStroops * 1e-7),
+    amount: trimmedFeeAmount,
     asset: Asset.native(),
     destination: contractAccount.id,
     source: clientAccount.id

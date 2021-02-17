@@ -62,6 +62,8 @@ export default depositLiquidity
 
 function prepareDeposit(account: AccountResponse, request: AMMRequestBody.Deposit) {
   const balancePair = getMarketBalancePair(account)
+  const supply = getPoolTokenTotal(account)
+
   const depositIntent = {
     amount: BigNumber(request.amount),
     asset: parseAssetIdentifier(request.asset)
@@ -80,12 +82,7 @@ function prepareDeposit(account: AccountResponse, request: AMMRequestBody.Deposi
       : depositIntent.amount
   ] as const
 
-  const postDepositPoolBalances = [
-    balancePair[0].add(depositAmounts[0]),
-    balancePair[1].add(depositAmounts[1])
-  ] as const
-
-  const liquidityTokens = postDepositPoolBalances[0].mul(postDepositPoolBalances[1]).div(depositAmounts[0].mul(depositAmounts[1]))
+  const liquidityTokens = depositAmounts[0].mul(supply).div(balancePair[0])
 
   const deposit = {
     depositAmounts,
