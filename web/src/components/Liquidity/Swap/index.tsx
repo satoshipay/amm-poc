@@ -121,7 +121,7 @@ function SwapView(props: Props) {
           .catch(console.error)
       )
     }
-  }, [accountID, amount, assetIn, assetOut, mode, networkPassphrase, submitTransaction])
+  }, [accountID, amount, assetIn, assetOut, mode, networkPassphrase, submitTransaction, submission])
 
   const disabled = !amount || !assetIn || !assetOut
 
