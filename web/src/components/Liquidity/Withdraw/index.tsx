@@ -70,7 +70,7 @@ function WithdrawLiquidityView(props: Props) {
         })
         .catch(console.error)
     )
-  }, [accountID, amount, networkPassphrase, submitTransaction])
+  }, [accountID, amount, networkPassphrase, submitTransaction, submission])
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center">

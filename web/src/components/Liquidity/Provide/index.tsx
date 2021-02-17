@@ -83,7 +83,7 @@ function ProvideLiquidityView(props: Props) {
       setCalculatedAmount("")
       setEstimatedLPT("")
     }
-  }, [userAmount, asset1, balancePair])
+  }, [userAmount, asset1, balancePair, poolTokenTotal])
 
   const onProvideClick = React.useCallback(() => {
     submission.track(
@@ -102,7 +102,7 @@ function ProvideLiquidityView(props: Props) {
         })
         .catch(console.error)
     )
-  }, [accountID, userAmount, asset1, networkPassphrase, submitTransaction])
+  }, [accountID, userAmount, asset1, networkPassphrase, submitTransaction, submission])
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
